@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поръчки за пицария</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label,
+        input,
+        button {
+            display: block;
+            margin: 10px 0;
+        }
+
+        #orders {
+            margin-top: 20px;
+        }
+
+        .order {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Онлайн поръчки за пицария</h1>
+
+    <!-- Форма за нова поръчка -->
+    <form id="orderForm">
+        <label for="name">Име на клиента:</label>
+        <input type="text" id="name" required>
+
+        <label for="address">Адрес за доставка:</label>
+        <input type="text" id="address" required>
+
+        <label for="phone">Телефон:</label>
+        <input type="text" id="phone" required>
+
+        <label for="pizza">Пица:</label>
+        <input type="text" id="pizza" required>
+
+        <label for="quantity">Количество:</label>
+        <input type="number" id="quantity" min="1" required>
+
+        <button type="submit">Изпрати поръчка</button>
+    </form>
+
+    <!-- Списък с поръчки -->
+    <h2>Списък с поръчки:</h2>
+    <div id="orders"></div>
+
+    <script>
+        // Зареждане на поръчките при стартиране
+        function loadOrders() {
+            $.get('/api/orders', (data) => {
+                $('#orders').empty();
+                data.forEach(order => {
+                    $('#orders').append(`
+                        <div class="order">
+                            <p><strong>Име:</strong> ${order.name}</p>
+                            <p><strong>Адрес:</strong> ${order.address}</p>
+                            <p><strong>Телефон:</strong> ${order.phone}</p>
+                            <p><strong>Пица:</strong> ${order.pizza} (${order.quantity} бр.)</p>
+                        </div>
+                    `);
+                });
+            });
+        }
+
+        // Добавяне на нова поръчка
+        $('#orderForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const newOrder = {
+                name: $('#name').val(),
+                address: $('#address').val(),
+                phone: $('#phone').val(),
+                pizza: $('#pizza').val(),
+                quantity: $('#quantity').val()
+            };
+
+            $.post('/api/orders', newOrder)
+                .done(() => {
+                    alert('Поръчката е успешно изпратена!');
+                    $('#orderForm')[0].reset();
+                    loadOrders();
+                })
+                .fail((err) => {
+                    alert('Грешка: ' + err.responseJSON.error);
+                });
+        });
+
+        // Зареждане на поръчките в началото
+        loadOrders();
+    </script>
+</body>
+
+</html>
